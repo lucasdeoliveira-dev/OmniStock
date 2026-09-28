@@ -1,0 +1,49 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: omnistock-db
+    environment:
+      POSTGRES_DB: omnistock
+      POSTGRES_USER: omnistock
+      POSTGRES_PASSWORD: omnistock
+    ports:
+      - "5432:5432"
+    volumes:
+      - omnistock-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U omnistock -d omnistock"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build: ./backend
+    container_name: omnistock-backend
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_NAME: omnistock
+      DB_USER: omnistock
+      DB_PASSWORD: omnistock
+      JWT_SECRET: troque-esta-chave-secreta-em-producao-0123456789
+      CORS_ALLOWED_ORIGINS: http://localhost:5173
+      BACKUP_DIR: /app/backups
+    ports:
+      - "8080:8080"
+    volumes:
+      - omnistock-backups:/app/backups
+
+  frontend:
+    build: ./frontend
+    container_name: omnistock-frontend
+    depends_on:
+      - backend
+    ports:
+      - "5173:5173"
+
+volumes:
+  omnistock-db-data:
+  omnistock-backups:

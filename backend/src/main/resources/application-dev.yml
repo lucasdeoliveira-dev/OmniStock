@@ -1,0 +1,8 @@
+logging:
+  level:
+    com.omnistock: DEBUG
+    org.springframework.security: DEBUG
+
+spring:
+  jpa:
+    show-sql: true

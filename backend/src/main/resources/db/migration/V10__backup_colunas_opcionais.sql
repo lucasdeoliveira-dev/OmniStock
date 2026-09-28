@@ -1,0 +1,3 @@
+ALTER TABLE backups
+    ALTER COLUMN arquivo DROP NOT NULL,
+    ALTER COLUMN caminho DROP NOT NULL;

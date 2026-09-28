@@ -1,0 +1,36 @@
+spring:
+  application:
+    name: omnistock-backend
+  profiles:
+    active: dev
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:omnistock}
+    username: ${DB_USER:omnistock}
+    password: ${DB_PASSWORD:omnistock}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: true
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+
+server:
+  port: ${SERVER_PORT:8080}
+
+omnistock:
+  security:
+    jwt:
+      secret: ${JWT_SECRET:troque-esta-chave-secreta-em-producao-0123456789}
+      expiration-ms: ${JWT_EXPIRATION_MS:86400000}
+  cors:
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:5173}
+
+springdoc:
+  api-docs:
+    path: /api/docs
+  swagger-ui:
+    path: /api/docs/ui

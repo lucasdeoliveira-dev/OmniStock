@@ -1,0 +1,46 @@
+### Build outputs ###
+backend/target/
+frontend/dist/
+frontend/node_modules/
+node_modules/
+
+### Env files (segredos locais) ###
+.env
+!.env.example
+frontend/.env
+!frontend/.env.example
+
+### Dados locais de backup gerados em execução ###
+backend/backups-local/
+
+### IntelliJ IDEA ###
+out/
+!**/src/main/**/out/
+!**/src/test/**/out/
+.kotlin
+.idea/
+
+### Eclipse ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+bin/
+!**/src/main/**/bin/
+!**/src/test/**/bin/
+
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+
+### VS Code ###
+.vscode/
+
+### Mac OS ###
+.DS_Store

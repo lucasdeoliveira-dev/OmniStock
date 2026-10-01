@@ -15,10 +15,6 @@ import java.nio.file.Path;
 import java.time.format.DateTimeFormatter;
 import java.time.LocalDateTime;
 
-/**
- * Restaura um backup em um banco de verificação isolado (não sobrescreve o banco em uso)
- * e compara a contagem de produtos para comprovar a integridade dos dados restaurados.
- */
 @Service
 public class RestoreService {
 
@@ -74,7 +70,8 @@ public class RestoreService {
             executarPsql("postgres", "-c", "CREATE DATABASE " + bancoRestauracao);
             executarPsql(bancoRestauracao, "-f", sqlParaRestaurar.toAbsolutePath().toString());
 
-            long contagemOriginal = contarProdutos(dbName);
+            String bancoOriginal = backup.getNomeBanco() == null ? dbName : backup.getNomeBanco();
+            long contagemOriginal = contarProdutos(bancoOriginal);
             long contagemRestaurada = contarProdutos(bancoRestauracao);
             boolean integro = contagemOriginal == contagemRestaurada;
 
@@ -95,7 +92,6 @@ public class RestoreService {
                 }
                 executarPsql("postgres", "-c", "DROP DATABASE IF EXISTS " + bancoRestauracao);
             } catch (Exception ignorado) {
-                // limpeza best-effort; não deve mascarar o resultado da restauração
             }
         }
     }

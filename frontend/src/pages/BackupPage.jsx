@@ -17,6 +17,7 @@ import {
   buscarBackup,
   buscarLogBackup,
   testarConexao,
+  listarBancosDisponiveis,
   iniciarBackup,
   restaurarBackup,
 } from "../services/backupService";
@@ -28,7 +29,7 @@ import Modal from "../components/common/Modal.jsx";
 const SENHA_PADRAO_BACKUP = "matehusmelhorprofessor";
 
 const PARAMETROS_VAZIOS = {
-  nomeBanco: "omnistock",
+  nomeBanco: "",
   caminhoDestino: "",
   criptografar: true,
   compactar: true,
@@ -48,6 +49,7 @@ export default function BackupPage() {
   const { usuario } = useAuth();
   const podeSolicitarBackup = usuario?.role === "ADMIN" || usuario?.role === "GERENTE";
   const [historico, setHistorico] = useState([]);
+  const [bancosDisponiveis, setBancosDisponiveis] = useState([]);
   const [manutencoes, setManutencoes] = useState([]);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState("");
@@ -78,6 +80,9 @@ export default function BackupPage() {
 
   useEffect(() => {
     carregar();
+    listarBancosDisponiveis()
+      .then(setBancosDisponiveis)
+      .catch(() => setErro("Não foi possível listar os bancos disponíveis para backup."));
     return () => clearInterval(pollingRef.current);
   }, []);
 
@@ -201,22 +206,27 @@ export default function BackupPage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className="block text-gray-400 mb-1">Banco de dados</label>
-            <input
+            <select
               required
-              type="text"
               value={parametros.nomeBanco}
               onChange={(e) => setParametros({ ...parametros, nomeBanco: e.target.value })}
               className="w-full bg-base-600 border border-purple-900 rounded px-3 py-2 text-white focus:outline-none focus:border-purple-500"
-            />
+            >
+              <option value="" disabled>
+                {bancosDisponiveis.length ? "Selecione um banco" : "Nenhum banco disponível"}
+              </option>
+              {bancosDisponiveis.map((banco) => (
+                <option key={banco} value={banco}>{banco}</option>
+              ))}
+            </select>
           </div>
           <div>
-            <label className="block text-gray-400 mb-1">Caminho de destino (vazio = padrão do servidor)</label>
+            <label className="block text-gray-400 mb-1">Pasta de destino</label>
             <input
               type="text"
-              value={parametros.caminhoDestino}
-              onChange={(e) => setParametros({ ...parametros, caminhoDestino: e.target.value })}
-              className="w-full bg-base-600 border border-purple-900 rounded px-3 py-2 text-white focus:outline-none focus:border-purple-500"
-              placeholder="/app/backups"
+              value="C:\\Backup"
+              readOnly
+              className="w-full bg-base-600/60 border border-purple-900 rounded px-3 py-2 text-white cursor-not-allowed"
             />
           </div>
         </div>

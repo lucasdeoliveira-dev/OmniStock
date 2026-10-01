@@ -34,10 +34,6 @@ public class ManutencaoService {
                 .toList();
     }
 
-    /**
-     * Decide o tipo de manutenção a ser aplicado. Uma escolha manual (não nula) sempre
-     * prevalece sobre a decisão automática baseada na data da última manutenção.
-     */
     public TipoManutencao decidir(TipoManutencao escolhaManual) {
         if (escolhaManual != null) {
             return escolhaManual;
@@ -78,10 +74,6 @@ public class ManutencaoService {
         return "Última manutenção há " + dias + " dias (>60) -> VACUUM FULL ANALYZE.";
     }
 
-    /**
-     * Executa a manutenção decidida (ou a escolha manual) e registra o resultado.
-     * VACUUM não pode rodar dentro de uma transação JPA, por isso usa uma conexão JDBC direta.
-     */
     public Manutencao executar(TipoManutencao escolhaManual) {
         TipoManutencao tipo = decidir(escolhaManual);
         String regra = descreverRegra(escolhaManual);

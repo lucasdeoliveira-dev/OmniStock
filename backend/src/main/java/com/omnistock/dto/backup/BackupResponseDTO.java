@@ -7,6 +7,7 @@ import java.time.LocalDateTime;
 public record BackupResponseDTO(
         Long id,
         String arquivo,
+        String nomeBanco,
         Long tamanhoBytes,
         boolean criptografado,
         boolean compactado,
@@ -20,7 +21,7 @@ public record BackupResponseDTO(
 ) {
     public static BackupResponseDTO de(Backup b) {
         return new BackupResponseDTO(
-                b.getId(), b.getArquivo(), b.getTamanhoBytes(), b.isCriptografado(), b.isCompactado(),
+                b.getId(), b.getArquivo(), b.getNomeBanco(), b.getTamanhoBytes(), b.isCriptografado(), b.isCompactado(),
                 b.getStatus(), b.getEtapaAtual(), b.getMensagem(),
                 b.getManutencao() != null ? b.getManutencao().getId() : null,
                 b.isLogEnviadoEmail(), b.getIniciadoEm(), b.getFinalizadoEm()

@@ -20,6 +20,11 @@ export async function testarConexao() {
   return data;
 }
 
+export async function listarBancosDisponiveis() {
+  const { data } = await axiosInstance.get("/backup/bancos");
+  return data;
+}
+
 export async function iniciarBackup(parametros) {
   const { data } = await axiosInstance.post("/backup", parametros);
   return data;

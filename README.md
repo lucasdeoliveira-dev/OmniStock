@@ -32,7 +32,13 @@ Isso sobe três serviços:
 | `backend` | 8080 | API REST (Spring Boot) |
 | `frontend` | 5173 | Interface web (React) |
 
-Acesse `http://localhost:5173`.
+Acesse `http://localhost:5173`. Para acessar de outra máquina na mesma rede, use `http://IP-DO-SERVIDOR:5173` e defina `CORS_ALLOWED_ORIGINS` com essa origem (por exemplo, `http://192.168.1.10:5173`) antes de subir o Compose. O frontend aponta a API para o mesmo host do navegador, na porta 8080.
+
+### Apontar para outro PostgreSQL
+
+Copie `.env.example` para `.env` e configure `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER` e `DB_PASSWORD`. Essas variáveis alimentam tanto a conexão do Spring quanto o `pg_dump` usado no backup. `DB_HOST` precisa ser acessível **de dentro do container**: use o nome/IP do servidor; para um PostgreSQL instalado na máquina host, use `host.docker.internal` (não `localhost`). Mantenha `DB_HOST=db` para usar o PostgreSQL interno do Compose. Em seguida, recrie os serviços com `docker compose up --build` e use **Testar Conexão** na tela de backup.
+
+A imagem do backend já instala o cliente PostgreSQL (`pg_dump` e `psql`). Não é necessário instalar essas ferramentas na máquina host. Os arquivos de backup ficam sempre em `C:\Backup`; o Compose cria essa pasta automaticamente se ela não existir e a monta no backend.
 
 ### Login de teste
 

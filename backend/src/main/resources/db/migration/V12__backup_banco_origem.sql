@@ -1,0 +1,1 @@
+ALTER TABLE backups ADD COLUMN nome_banco VARCHAR(255);

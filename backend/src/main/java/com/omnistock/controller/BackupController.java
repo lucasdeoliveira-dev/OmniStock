@@ -29,6 +29,11 @@ public class BackupController {
         return ResponseEntity.ok(backupService.listarHistorico());
     }
 
+    @GetMapping("/bancos")
+    public ResponseEntity<List<String>> bancosDisponiveis() {
+        return ResponseEntity.ok(backupService.listarBancosDisponiveis());
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<BackupResponseDTO> buscarPorId(@PathVariable Long id) {
         return ResponseEntity.ok(backupService.buscarPorId(id));

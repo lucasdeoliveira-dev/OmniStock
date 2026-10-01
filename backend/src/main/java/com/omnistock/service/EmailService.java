@@ -11,10 +11,6 @@ import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
-/**
- * Simula o envio de e-mail (não há servidor SMTP configurado no ambiente controlado do trabalho).
- * A "prova de envio" é um arquivo .txt gravado em disco com o conteúdo que seria enviado.
- */
 @Service
 public class EmailService {
 

@@ -15,6 +15,7 @@ import javax.sql.DataSource;
 import java.sql.Connection;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.ArrayList;
 
 @Service
 public class BackupService {
@@ -22,9 +23,6 @@ public class BackupService {
     private final BackupRepository backupRepository;
     private final BackupExecutionWorker backupExecutionWorker;
     private final DataSource dataSource;
-
-    @Value("${DB_NAME:omnistock}")
-    private String dbName;
 
     @Value("${DB_PASSWORD:omnistock}")
     private String dbPassword;
@@ -56,29 +54,45 @@ public class BackupService {
         return backup.getLog() == null ? "" : backup.getLog();
     }
 
-    public TesteConexaoResponseDTO testarConexao() {
-        try (Connection conexao = dataSource.getConnection()) {
-            boolean valida = conexao.isValid(3);
-            return new TesteConexaoResponseDTO(valida, valida
-                    ? "Conexão com o banco '" + dbName + "' estabelecida com sucesso."
-                    : "Não foi possível validar a conexão.");
+    @Transactional(readOnly = true)
+    public List<String> listarBancosDisponiveis() {
+        String sql = "SELECT datname FROM pg_database " +
+                "WHERE datallowconn AND NOT datistemplate " +
+                "AND has_database_privilege(datname, 'CONNECT') ORDER BY datname";
+        try (Connection conexao = dataSource.getConnection();
+             var consulta = conexao.prepareStatement(sql);
+             var resultados = consulta.executeQuery()) {
+            List<String> bancos = new ArrayList<>();
+            while (resultados.next()) {
+                bancos.add(resultados.getString("datname"));
+            }
+            return bancos;
         } catch (Exception e) {
-            return new TesteConexaoResponseDTO(false, "Falha ao conectar: " + mensagemSegura(e));
+            throw new BusinessException("Não foi possível listar os bancos disponíveis: " + mensagemSegura(e));
         }
     }
 
-    /**
-     * Valida os parâmetros e dispara a execução em background (BackupExecutionWorker),
-     * retornando imediatamente com o registro em EM_ANDAMENTO para o frontend fazer polling.
-     */
+    public TesteConexaoResponseDTO testarConexao() {
+        try (Connection conexao = dataSource.getConnection()) {
+            boolean valida = conexao.isValid(3);
+            String bancoConectado = conexao.getCatalog();
+            return new TesteConexaoResponseDTO(valida, valida
+                    ? "Conexão com o banco '" + bancoConectado + "' estabelecida com sucesso."
+                    : "Não foi possível validar a conexão.", bancoConectado);
+        } catch (Exception e) {
+            return new TesteConexaoResponseDTO(false, "Falha ao conectar: " + mensagemSegura(e), null);
+        }
+    }
+
     public BackupResponseDTO iniciar(BackupRequestDTO dto) {
-        if (!dto.nomeBanco().equals(dbName)) {
-            throw new BusinessException("Banco de dados inválido. Esperado: " + dbName);
+        if (!listarBancosDisponiveis().contains(dto.nomeBanco())) {
+            throw new BusinessException("O banco selecionado não está disponível para o usuário configurado.");
         }
         validarCaminho(dto.caminhoCopiaAdicional());
         validarCaminho(dto.caminhoDestino());
 
         Backup backup = new Backup();
+        backup.setNomeBanco(dto.nomeBanco());
         backup.setStatus("EM_ANDAMENTO");
         backup.setEtapaAtual("Validando conexão e parâmetros");
         backup.setIniciadoEm(LocalDateTime.now());

@@ -22,11 +22,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.Comparator;
 import java.util.List;
 
-/**
- * Executa o processo de backup de fato, em uma thread separada (@Async).
- * Fica isolado do BackupService para que o proxy de @Async do Spring seja respeitado
- * (chamadas via "this." dentro da mesma classe não são interceptadas pelo proxy).
- */
 @Service
 public class BackupExecutionWorker {
 
@@ -41,9 +36,6 @@ public class BackupExecutionWorker {
 
     @Value("${DB_PORT:5432}")
     private String dbPort;
-
-    @Value("${DB_NAME:omnistock}")
-    private String dbName;
 
     @Value("${DB_USER:omnistock}")
     private String dbUser;
@@ -81,7 +73,7 @@ public class BackupExecutionWorker {
             Path pastaDestino = Path.of(diretorio);
             Files.createDirectories(pastaDestino);
             Path dump = pastaDestino.resolve("dump_" + timestamp + ".sql");
-            executarPgDump(dump);
+            executarPgDump(dump, dto.nomeBanco());
             logar(backupId, "[BACKUP] Dump gerado em " + dump.getFileName());
 
             Path arquivoFinal = dump;
@@ -110,10 +102,10 @@ public class BackupExecutionWorker {
         }
     }
 
-    private void executarPgDump(Path destino) throws IOException, InterruptedException {
+    private void executarPgDump(Path destino, String banco) throws IOException, InterruptedException {
         ProcessBuilder pb = new ProcessBuilder(
                 "pg_dump", "-h", dbHost, "-p", dbPort, "-U", dbUser,
-                "-F", "p", "-f", destino.toAbsolutePath().toString(), dbName
+                "-F", "p", "-f", destino.toAbsolutePath().toString(), banco
         );
         pb.environment().put("PGPASSWORD", dbPassword);
         pb.redirectErrorStream(true);

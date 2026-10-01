@@ -20,6 +20,9 @@ public class Backup {
 
     private String arquivo;
 
+    @Column(name = "nome_banco")
+    private String nomeBanco;
+
     private String caminho;
 
     @Column(name = "tamanho_bytes")
